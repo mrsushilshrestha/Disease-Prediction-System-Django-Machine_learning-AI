@@ -1,0 +1,150 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Admin Controls</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'admin_dash' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                        <a href="{% url 'manage_users' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-users mr-2"></i> Manage Users
+                        </a>
+                        <a href="{% url 'register_admin' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-shield mr-2"></i> Create Admin
+                        </a>
+                        <a href="/admin/" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cogs mr-2"></i> Django Admin
+                        </a>
+                        <a href="{% url 'home' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-home mr-2"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Manage Users</h4>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                            Filter By
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="?filter=all">All Users</a></li>
+                            <li><a class="dropdown-item" href="?filter=patient">Patients</a></li>
+                            <li><a class="dropdown-item" href="?filter=doctor">Doctors</a></li>
+                            <li><a class="dropdown-item" href="?filter=admin">Admins</a></li>
+                            <li><a class="dropdown-item" href="?filter=active">Active Users</a></li>
+                            <li><a class="dropdown-item" href="?filter=inactive">Inactive Users</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>User Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for profile in user_profiles %}
+                                <tr>
+                                    <td>{{ profile.user.username }}</td>
+                                    <td>{{ profile.user.first_name }} {{ profile.user.last_name }}</td>
+                                    <td>{{ profile.user.email }}</td>
+                                    <td>
+                                        <span class="badge {% if profile.user_type == 'admin' %}bg-danger{% elif profile.user_type == 'doctor' %}bg-info{% else %}bg-success{% endif %}">
+                                            {{ profile.user_type|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if profile.user.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <form method="post" action="{% url 'manage_users' %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                                                        {% if profile.user.is_active %}
+                                                        <input type="hidden" name="action" value="deactivate">
+                                                        <button type="submit" class="dropdown-item text-warning">
+                                                            <i class="fas fa-user-slash mr-2"></i> Deactivate
+                                                        </button>
+                                                        {% else %}
+                                                        <input type="hidden" name="action" value="activate">
+                                                        <button type="submit" class="dropdown-item text-success">
+                                                            <i class="fas fa-user-check mr-2"></i> Activate
+                                                        </button>
+                                                        {% endif %}
+                                                    </form>
+                                                </li>
+                                                {% if profile.user_type == 'doctor' %}
+                                                <li>
+                                                    {% if profile.doctor_profile %}
+                                                    <a href="{% url 'verify_doctor' profile.doctor_profile.id %}" class="dropdown-item text-info">
+                                                        <i class="fas fa-user-md mr-2"></i> Manage Doctor
+                                                    </a>
+                                                    {% else %}
+                                                    <span class="dropdown-item text-muted">
+                                                        <i class="fas fa-exclamation-circle mr-2"></i> Doctor Profile Missing
+                                                    </span>
+                                                    {% endif %}
+                                                </li>
+                                                {% endif %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form method="post" action="{% url 'manage_users' %}" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <button type="submit" class="dropdown-item text-danger">
+                                                            <i class="fas fa-trash-alt mr-2"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No users found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

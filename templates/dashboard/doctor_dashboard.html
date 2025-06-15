@@ -1,0 +1,283 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Welcome, Dr. {{ doctor.user_profile.user.first_name }} {{ doctor.user_profile.user.last_name }}!</h1>
+    
+    <div class="row">
+        <!-- Statistics Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Your Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Patients Verified:</strong> {{ stats.patients_verified }}</p>
+                    <p><strong>Problems Resolved:</strong> {{ stats.problems_resolved }}</p>
+                    <p><strong>Average Response Time:</strong> {{ stats.average_response_time|floatformat:1 }} hours</p>
+                    <p><strong>Last Updated:</strong> {{ stats.last_updated|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions Card -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <a href="#" class="btn btn-success btn-block">Verify Predictions</a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="{% url 'unassigned_problems' %}" class="btn btn-warning btn-block">View Unassigned Problems</a>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <a href="#assigned-problems" class="btn btn-info btn-lg btn-block">View Assigned Problems ↓</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Predictions -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Pending Predictions to Verify</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_predictions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>Symptoms</th>
+                            <th>Predicted Disease</th>
+                            <th>Confidence</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prediction in pending_predictions %}
+                        <tr>
+                            <td>{{ prediction.created_at|date:"M d, Y" }}</td>
+                            <td>{{ prediction.patient.user_profile.user.username }}</td>
+                            <td>{{ prediction.symptoms_text|truncatechars:30 }}</td>
+                            <td>{{ prediction.predicted_disease.name }}</td>
+                            <td>{{ prediction.confidence_score|floatformat:2 }}%</td>
+                            <td>
+                                <a href="{% url 'verify_prediction' prediction.id %}" class="btn btn-sm btn-primary">Verify</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">There are no pending predictions to verify.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Assigned Problems -->
+    <div class="card mb-4" id="assigned-problems">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Assigned Health Problems</h4>
+            <div class="btn-group">
+                <button data-filter="all" class="btn btn-sm btn-outline-light filter-btn {% if not request.GET.problem_filter or request.GET.problem_filter == 'all' %}active{% endif %}">All</button>
+                <button data-filter="pending" class="btn btn-sm btn-outline-light filter-btn {% if request.GET.problem_filter == 'pending' %}active{% endif %}">Pending</button>
+                <button data-filter="in_review" class="btn btn-sm btn-outline-light filter-btn {% if request.GET.problem_filter == 'in_review' %}active{% endif %}">In Review</button>
+                <button data-filter="resolved" class="btn btn-sm btn-outline-light filter-btn {% if request.GET.problem_filter == 'resolved' %}active{% endif %}">Resolved</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="card-body">
+                <div id="loading-spinner" style="display: none;" class="text-center my-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                {% if assigned_problems %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Patient</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assigned-problems-table">
+                            {% for problem in assigned_problems %}
+                            <tr>
+                                <td>{{ problem.created_at|date:"M d, Y" }}</td>
+                                <td>{{ problem.patient.user_profile.user.username }}</td>
+                                <td>{{ problem.title }}</td>
+                                <td>
+                                    {% if problem.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% elif problem.status == 'in_review' %}
+                                    <span class="badge bg-info">In Review</span>
+                                    {% elif problem.status == 'resolved' %}
+                                    <span class="badge bg-success">Resolved</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if problem.status != 'resolved' %}
+                                    <a href="{% url 'respond_to_problem' problem.id %}" class="btn btn-sm btn-primary">Respond</a>
+                                    {% else %}
+                                    <a href="{% url 'problem_detail' problem.id %}" class="btn btn-sm btn-secondary">View</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p id="no-assigned-problems" class="text-muted">You don't have any assigned health problems.</p>
+                {% endif %}
+            </div>
+    </div>
+    
+    <!-- Notifications -->
+    {% if notifications %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Unread Notifications</h5>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for notification in notifications %}
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ notification.title }}</h5>
+                        <small>{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    <p class="mb-1">{{ notification.message }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Store the current scroll position before page reload
+    window.addEventListener('beforeunload', function() {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+    
+    // Restore scroll position after page loads
+    window.addEventListener('load', function() {
+        // Check if there's a stored position and if we're on the doctor dashboard
+        if (localStorage.getItem('scrollPosition')) {
+            window.scrollTo(0, localStorage.getItem('scrollPosition'));
+            localStorage.removeItem('scrollPosition'); // Clear after use
+        }
+        
+        // If URL has a hash, let the browser's default behavior handle it
+        if (window.location.hash) {
+            // The browser will automatically scroll to the element
+        }
+    });
+
+    // AJAX filtering for assigned problems
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const problemsTableBody = document.querySelector('#assigned-problems-table tbody');
+        const noProblemsMessage = document.querySelector('#no-assigned-problems');
+        const loadingSpinner = document.querySelector('#loading-spinner');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Update active state
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show loading spinner
+                if (loadingSpinner) loadingSpinner.style.display = 'block';
+                
+                // Get filter value from data attribute
+                const filter = this.dataset.filter;
+                
+                // Fetch filtered problems
+                fetch(`/dashboard/doctor/?problem_filter=${filter}&ajax=true`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (loadingSpinner) loadingSpinner.style.display = 'none';
+                        
+                        if (data.problems.length === 0) {
+                            problemsTableBody.innerHTML = '';
+                            if (noProblemsMessage) noProblemsMessage.style.display = 'block';
+                        } else {
+                            if (noProblemsMessage) noProblemsMessage.style.display = 'none';
+                            
+                            // Update table with new data
+                            problemsTableBody.innerHTML = '';
+                            data.problems.forEach(problem => {
+                                const row = document.createElement('tr');
+                                
+                                // Format date
+                                const date = new Date(problem.created_at);
+                                const formattedDate = date.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                });
+                                
+                                // Create status badge
+                                let statusBadge = '';
+                                if (problem.status === 'pending') {
+                                    statusBadge = '<span class="badge bg-warning">Pending</span>';
+                                } else if (problem.status === 'in_review') {
+                                    statusBadge = '<span class="badge bg-info">In Review</span>';
+                                } else if (problem.status === 'resolved') {
+                                    statusBadge = '<span class="badge bg-success">Resolved</span>';
+                                }
+                                
+                                // Create action button
+                                let actionButton = '';
+                                if (problem.status !== 'resolved') {
+                                    actionButton = `<a href="/dashboard/doctor/respond-problem/${problem.id}/" class="btn btn-sm btn-primary">Respond</a>`;
+                                } else {
+                                    actionButton = `<a href="/prediction/problem/${problem.id}/" class="btn btn-sm btn-secondary">View</a>`;
+                                }
+                                
+                                // Build row HTML
+                                row.innerHTML = `
+                                    <td>${formattedDate}</td>
+                                    <td>${problem.patient_name}</td>
+                                    <td>${problem.title}</td>
+                                    <td>${statusBadge}</td>
+                                    <td>${actionButton}</td>
+                                `;
+                                
+                                problemsTableBody.appendChild(row);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching problems:', error);
+                        if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Verification Pending{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0">Account Verification Pending</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-clock fa-4x text-warning"></i>
+                    </div>
+                    <h4>Your doctor account is awaiting verification</h4>
+                    <p class="lead mt-3">Our administrators need to verify your credentials before you can access the doctor dashboard.</p>
+                    <p>This process usually takes 1-2 business days. You will receive an email notification once your account has been verified.</p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <h5>Why do we verify doctors?</h5>
+                        <p>To maintain the integrity of our platform and ensure patient safety, we verify all healthcare professionals before granting them full access to our system.</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'home' %}" class="btn btn-primary">Return to Home</a>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">If your verification is taking longer than expected, please contact our support team.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

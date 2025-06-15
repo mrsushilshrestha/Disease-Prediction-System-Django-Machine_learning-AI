@@ -1,0 +1,199 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Admin Controls</h4>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Updated sidebar with more comprehensive admin controls -->
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'admin_dash' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                        <a href="{% url 'manage_users' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users mr-2"></i> Manage Users
+                        </a>
+                        <a href="{% url 'register_admin' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-shield mr-2"></i> Create Admin
+                        </a>
+                        <a href="{% url 'manage_users' %}?filter=doctor" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-md mr-2"></i> Manage Doctors
+                        </a>
+                        <a href="{% url 'manage_users' %}?filter=patient" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user-injured mr-2"></i> Manage Patients
+                        </a>
+                        <a href="{% url 'admin_prescriptions' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-prescription mr-2"></i> View Prescriptions
+                        </a>
+                        <a href="/admin/" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cogs mr-2"></i> Django Admin
+                        </a>
+                        <a href="{% url 'home' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-home mr-2"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- System Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Total Users</h5>
+                            <h2 class="display-4">{{ total_users }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Patients</h5>
+                            <h2 class="display-4">{{ total_patients }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Doctors</h5>
+                            <h2 class="display-4">{{ total_doctors }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Predictions</h5>
+                            <h2 class="display-4">{{ total_predictions }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Doctor Verifications -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Pending Doctor Verifications ({{ pending_doctors.count }})</h4>
+                </div>
+                <div class="card-body">
+                    {% if pending_doctors %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Specialization</th>
+                                    <th>Experience</th>
+                                    <th>License</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in pending_doctors %}
+                                <tr>
+                                    <td>Dr. {{ doctor.user_profile.user.first_name }} {{ doctor.user_profile.user.last_name }}</td>
+                                    <td>{{ doctor.specialization }}</td>
+                                    <td>{{ doctor.experience_years }} years</td>
+                                    <td>{{ doctor.license_number }}</td>
+                                    <td>
+                                        <a href="{% url 'verify_doctor' doctor.id %}" class="btn btn-sm btn-success">Verify</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No pending doctor verifications.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Predictions -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Recent Predictions</h4>
+                </div>
+                <div class="card-body">
+                    {% if recent_predictions %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Disease</th>
+                                    <th>Confidence</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediction in recent_predictions %}
+                                <tr>
+                                    <td>{{ prediction.patient.user_profile.user.username }}</td>
+                                    <td>{{ prediction.predicted_disease.name }}</td>
+                                    <td>{{ prediction.confidence_score|floatformat:2 }}%</td>
+                                    <td>{{ prediction.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if prediction.is_verified %}
+                                        <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No predictions available.</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Disease Statistics -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Top Diseases</h4>
+                </div>
+                <div class="card-body">
+                    {% if disease_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Disease</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for disease in disease_stats %}
+                                <tr>
+                                    <td>{{ disease.predicted_disease__name }}</td>
+                                    <td>{{ disease.count }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No disease statistics available.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

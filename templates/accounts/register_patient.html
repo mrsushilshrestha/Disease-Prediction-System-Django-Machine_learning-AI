@@ -1,0 +1,96 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Patient Registration{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Patient Registration</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <hr>
+                        <h4>Health Information</h4>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="weight">Weight (kg)</label>
+                                <input type="number" step="0.01" class="form-control" id="weight" name="weight" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="age">Age</label>
+                                <input type="number" class="form-control" id="age" name="age" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone_number">Contact Number</label>
+                                <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="height">Height (cm)</label>
+                                <input type="number" step="0.01" class="form-control" id="height" name="height">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="blood_group">Blood Group</label>
+                                <select class="form-control" id="blood_group" name="blood_group">
+                                    <option value="">Select</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="blood_pressure">Blood Pressure (optional)</label>
+                                <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" placeholder="e.g., 120/80">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="sugar_level">Sugar Level (optional)</label>
+                                <input type="text" class="form-control" id="sugar_level" name="sugar_level" placeholder="e.g., 90 mg/dL">
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

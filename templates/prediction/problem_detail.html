@@ -1,0 +1,103 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Health Problem Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Health Problem Details</h3>
+                    <span class="badge {% if problem.status == 'pending' %}bg-warning{% elif problem.status == 'in_review' %}bg-primary{% else %}bg-success{% endif %}">
+                        {{ problem.status|title }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">{{ problem.title }}</h4>
+                    <p class="text-muted small">Submitted on: {{ problem.created_at|date:"F d, Y" }} at {{ problem.created_at|time:"H:i" }}</p>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">Description</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ problem.description }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if problem.symptoms %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">Symptoms *</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ problem.symptoms }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.duration %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">Duration</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ problem.duration }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.taking_medicine == 'yes' and problem.medicine_details %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">Medications</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ problem.medicine_details }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.picture %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">Uploaded Image</div>
+                        <div class="card-body text-center">
+                            <img src="{{ problem.picture.url }}" alt="Uploaded image" class="img-fluid" style="max-height: 300px;">
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.assigned_doctor %}
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Assigned Doctor</h5>
+                        <p>Dr. {{ problem.assigned_doctor.user_profile.user.get_full_name }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if problem.doctor_response %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">Doctor's Response</div>
+                        <div class="card-body">
+                            <p class="card-text">{{ problem.doctor_response }}</p>
+                            <p class="text-muted small">Last updated: {{ problem.updated_at|date:"F d, Y" }} at {{ problem.updated_at|time:"H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        {% if user.userprofile.user_type == 'patient' %}
+                        <a href="{% url 'problem_list' %}" class="btn btn-secondary">Back to My Problems</a>
+                        {% elif user.userprofile.user_type == 'doctor' %}
+                        <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                        {% endif %}
+                        
+                        {% if user.userprofile.user_type == 'doctor' and not problem.assigned_doctor and user.userprofile.doctor.is_verified %}
+                        <form method="post" action="{% url 'assign_problem' problem.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Take This Case</button>
+                        </form>
+                        {% endif %}
+                        
+                        {% if user.userprofile.user_type == 'doctor' and problem.assigned_doctor.user_profile.user == user %}
+                        <a href="{% url 'respond_to_problem' problem.id %}" class="btn btn-primary">Respond</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

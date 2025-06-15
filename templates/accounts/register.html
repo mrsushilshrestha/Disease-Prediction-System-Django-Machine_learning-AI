@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Register</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">Patient Registration</h4>
+                                    <p class="card-text">Register as a patient to get disease predictions and consult with doctors.</p>
+                                    <a href="{% url 'register_patient' %}" class="btn btn-primary">Register as Patient</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title">Doctor Registration</h4>
+                                    <p class="card-text">Register as a doctor to help patients with their health concerns.</p>
+                                    <a href="{% url 'register_doctor' %}" class="btn btn-primary">Register as Doctor</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

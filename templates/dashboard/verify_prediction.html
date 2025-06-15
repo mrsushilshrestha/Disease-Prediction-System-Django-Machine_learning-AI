@@ -1,0 +1,102 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Verify Prediction{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Verify Disease Prediction</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h4>Prediction Details</h4>
+                            <div class="alert alert-info">
+                                <p><strong>Predicted Disease:</strong> {{ prediction.predicted_disease.name }}</p>
+                                <p><strong>Confidence Score:</strong> {{ prediction.confidence_score|floatformat:2 }}%</p>
+                                <p><strong>Date Created:</strong> {{ prediction.created_at|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Patient Information</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if prediction.patient %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Patient:</strong> {{ prediction.patient.user_profile.user.first_name }} {{ prediction.patient.user_profile.user.last_name }}</p>
+                                    <p><strong>Email:</strong> {{ prediction.patient.user_profile.user.email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Age:</strong> {{ prediction.patient.age|default:"Not provided" }}</p>
+                                    <p><strong>Gender:</strong> {{ prediction.patient.gender|default:"Not provided" }}</p>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">This prediction was made anonymously.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Symptoms Reported</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ prediction.symptoms }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Disease Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Description:</strong></p>
+                            <p>{{ prediction.predicted_disease.description }}</p>
+                            
+                            <p><strong>Causes:</strong></p>
+                            <p>{{ prediction.predicted_disease.causes }}</p>
+                            
+                            {% if prediction.predicted_disease.medications %}
+                            <p><strong>Recommended Medications:</strong></p>
+                            <p>{{ prediction.predicted_disease.medications }}</p>
+                            {% endif %}
+                            
+                            {% if prediction.predicted_disease.home_remedies %}
+                            <p><strong>Home Remedies:</strong></p>
+                            <p>{{ prediction.predicted_disease.home_remedies }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{% url 'verify_prediction' prediction.id %}">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="doctor_notes"><strong>Doctor's Notes:</strong></label>
+                            <textarea class="form-control" id="doctor_notes" name="doctor_notes" rows="5" required></textarea>
+                            <small class="form-text text-muted">Please provide your professional assessment of this prediction.</small>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h5>Verification Notice</h5>
+                            <p>By verifying this prediction, you confirm that the predicted disease and its information are accurate based on the symptoms provided. Your verification will be visible to the patient.</p>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                            <button type="submit" class="btn btn-success">Verify Prediction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

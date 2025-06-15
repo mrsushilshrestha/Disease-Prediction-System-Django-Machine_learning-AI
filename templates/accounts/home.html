@@ -1,0 +1,351 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Home - Disease Prediction System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        margin-top: -24px;
+        border-radius: 0 0 20px 20px;
+    }
+    
+    .feature-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon {
+        height: 100px;
+        width: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        color: #0d6efd;
+    }
+    
+    .testimonial-section {
+        background-color: #f8f9fa;
+        padding: 60px 0;
+        border-radius: 20px;
+        margin: 40px 0;
+    }
+    
+    .testimonial-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .testimonial-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 15px;
+    }
+    
+    .stats-counter {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        color: white;
+        border-radius: 20px;
+        padding: 40px 0;
+        margin: 40px 0;
+    }
+    
+    .counter-item {
+        text-align: center;
+    }
+    
+    .counter-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .cta-section {
+        background-color: #0d6efd;
+        color: white;
+        padding: 60px 0;
+        border-radius: 20px;
+        margin: 40px 0;
+    }
+    
+    .btn-light-outline {
+        color: white;
+        border-color: white;
+    }
+    
+    .btn-light-outline:hover {
+        background-color: white;
+        color: #0d6efd;
+    }
+    
+    .how-it-works {
+        padding: 60px 0;
+    }
+    
+    .step-card {
+        text-align: center;
+        padding: 30px;
+    }
+    
+    .step-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0 auto 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-3 fw-bold mb-4">Welcome to Disease Prediction System</h1>
+        <p class="lead fs-4 mb-5">An intelligent healthcare platform that helps predict diseases based on symptoms using advanced machine learning algorithms</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a class="btn btn-primary btn-lg px-4 py-3" href="{% url 'prediction_home' %}">
+                <i class="fas fa-stethoscope me-2"></i>Predict Disease
+            </a>
+            {% if not user.is_authenticated %}
+            <a class="btn btn-light btn-lg px-4 py-3" href="{% url 'register' %}">
+                <i class="fas fa-user-plus me-2"></i>Register
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mt-5 pt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Our Platform Features</h2>
+        <p class="text-muted">Discover how our system can help you manage your health</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-md fa-3x"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">For Doctors</h4>
+                    <p class="card-text">Join our platform to help patients by verifying predictions and responding to health problems. Access a dashboard to manage patient interactions.</p>
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register_doctor' %}" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Register as Doctor
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-heartbeat fa-3x"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">For Patients</h4>
+                    <p class="card-text">Get disease predictions based on your symptoms and track your health history. Connect with verified doctors for professional advice.</p>
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'register_patient' %}" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Register as Patient
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain fa-3x"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">AI Powered</h4>
+                    <p class="card-text">Our system uses advanced machine learning algorithms to predict diseases with high accuracy based on symptom patterns and medical data.</p>
+                    <a href="{% url 'prediction_home' %}" class="btn btn-outline-primary mt-3">
+                        <i class="fas fa-rocket me-2"></i>Try Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">Simple steps to get started with our disease prediction system</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5>Create Account</h5>
+                    <p class="text-muted">Register as a patient or doctor to access our platform</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5>Enter Symptoms</h5>
+                    <p class="text-muted">Select your symptoms from our comprehensive database</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5>Get Prediction</h5>
+                    <p class="text-muted">Our AI analyzes your symptoms and predicts possible diseases</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h5>Doctor Verification</h5>
+                    <p class="text-muted">Verified doctors review predictions for accuracy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Counter -->
+<section class="stats-counter">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="counter-item">
+                    <div class="counter-number">5000+</div>
+                    <p class="fs-5">Successful Predictions</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="counter-item">
+                    <div class="counter-number">100+</div>
+                    <p class="fs-5">Verified Doctors</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="counter-item">
+                    <div class="counter-number">50+</div>
+                    <p class="fs-5">Detectable Diseases</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonial-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">What Our Users Say</h2>
+            <p class="text-muted">Testimonials from patients and doctors using our platform</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTs9PAkhU-IT0v5UqLti2UcqVQ2n-Crt1jkAw&s" alt="User" class="testimonial-img">
+                    <h5>Toshima Karki</h5>
+                    <p class="text-muted mb-3">Cardiologist</p>
+                    <p>"This platform has revolutionized how I interact with patients. The AI predictions are remarkably accurate and help me provide better care."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <img src="https://nepalimoviesweb.wordpress.com/wp-content/uploads/2016/07/pradeep-khadka.jpg?w=441&h=434" alt="User" class="testimonial-img">
+                    <h5>Pardip Khadka</h5>
+                    <p class="text-muted mb-3">Patient</p>
+                    <p>"I was able to get an accurate prediction of my condition before visiting the hospital. The doctor confirmed the prediction and I received timely treatment."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <img src="https://clinicone.com.np/wp-content/uploads/2020/05/Dr.-Mahesh-Dahal-400x450.jpg" alt="User" class="testimonial-img">
+                    <h5>Dr.Ram B. Thapa</h5>
+                    <p class="text-muted mb-3">Neurologist</p>
+                    <p>"The system's ability to detect patterns in symptoms has helped me diagnose complex neurological conditions more efficiently."</p>
+                    <div class="text-warning">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Ready to Get Started?</h2>
+        <p class="lead mb-4">Join thousands of users who trust our platform for disease prediction and healthcare management</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a class="btn btn-light btn-lg px-4" href="{% url 'prediction_home' %}">
+                <i class="fas fa-stethoscope me-2"></i>Try Prediction
+            </a>
+            {% if not user.is_authenticated %}
+            <a class="btn btn-light-outline btn-lg px-4" href="{% url 'register' %}">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

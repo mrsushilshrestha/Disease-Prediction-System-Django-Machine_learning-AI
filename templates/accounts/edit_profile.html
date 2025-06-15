@@ -1,0 +1,134 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Edit Profile - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.user.first_name }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ request.user.last_name }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ user_profile.phone_number }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3">{{ user_profile.address }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profile_picture" class="form-label">Profile Picture</label>
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture">
+                            {% if user_profile.profile_picture %}
+                                <div class="mt-2">
+                                    <img src="{{ user_profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 150px;">
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if user_profile.user_type == 'patient' %}
+                        <!-- Patient specific fields -->
+                        <hr>
+                        <h5>Patient Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="height" class="form-label">Height (cm)</label>
+                                <input type="number" class="form-control" id="height" name="height" value="{{ patient.height }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" name="weight" value="{{ patient.weight }}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_group" class="form-label">Blood Group</label>
+                                <select class="form-select" id="blood_group" name="blood_group">
+                                    <option value="A+" {% if patient.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if patient.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if patient.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if patient.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if patient.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if patient.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if patient.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if patient.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="blood_pressure" class="form-label">Blood Pressure</label>
+                                <input type="text" class="form-control" id="blood_pressure" name="blood_pressure" value="{{ patient.blood_pressure }}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sugar_level" class="form-label">Sugar Level</label>
+                            <input type="text" class="form-control" id="sugar_level" name="sugar_level" value="{{ patient.sugar_level }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="allergies" class="form-label">Allergies</label>
+                            <textarea class="form-control" id="allergies" name="allergies" rows="3">{{ patient.allergies }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="medical_history" class="form-label">Medical History</label>
+                            <textarea class="form-control" id="medical_history" name="medical_history" rows="3">{{ patient.medical_history }}</textarea>
+                        </div>
+                        {% elif user_profile.user_type == 'doctor' %}
+                        <!-- Doctor specific fields -->
+                        <hr>
+                        <h5>Doctor Information</h5>
+                        <div class="mb-3">
+                            <label for="specialization" class="form-label">Specialization</label>
+                            <input type="text" class="form-control" id="specialization" name="specialization" value="{{ doctor.specialization }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="qualification" class="form-label">Qualification</label>
+                            <input type="text" class="form-control" id="qualification" name="qualification" value="{{ doctor.qualification }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="experience_years" class="form-label">Years of Experience</label>
+                            <input type="number" class="form-control" id="experience_years" name="experience_years" value="{{ doctor.experience_years }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3">{{ doctor.bio }}</textarea>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                            <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

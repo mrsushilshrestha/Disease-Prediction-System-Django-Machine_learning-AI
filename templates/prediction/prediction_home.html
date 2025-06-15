@@ -1,0 +1,79 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Predict Disease - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Predict Disease Based on Symptoms</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'predict_disease' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Select Symptoms (choose all that apply)</label>
+                        <div class="row">
+                            {% for symptom in symptoms %}
+                            <div class="col-md-4 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input symptom-checkbox" type="checkbox" name="symptoms" value="{{ symptom.name }}" id="symptom-{{ symptom.id }}">
+                                    <label class="form-check-label" for="symptom-{{ symptom.id }}">
+                                        {{ symptom.name }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Selected Symptoms:</label>
+                        <div id="selected-symptoms" class="p-2 border rounded">
+                            <!-- Selected symptoms will appear here -->
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" disabled>Predict Disease</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkboxes = document.querySelectorAll('.symptom-checkbox');
+        const selectedSymptomsDiv = document.getElementById('selected-symptoms');
+        const submitButton = document.querySelector('button[type="submit"]');
+        
+        function updateSelectedSymptoms() {
+            const selected = [];
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selected.push(checkbox.value);
+                }
+            });
+            
+            // Update the selected symptoms display
+            if (selected.length > 0) {
+                selectedSymptomsDiv.innerHTML = selected.map(s => `<span class="badge bg-primary me-2 mb-2">${s}</span>`).join('');
+                submitButton.disabled = false;
+            } else {
+                selectedSymptomsDiv.innerHTML = '<em>No symptoms selected</em>';
+                submitButton.disabled = true;
+            }
+        }
+        
+        // Add event listeners to all checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedSymptoms);
+        });
+        
+        // Initialize
+        updateSelectedSymptoms();
+    });
+</script>
+{% endblock %}
+{% endblock %}

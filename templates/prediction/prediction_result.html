@@ -1,0 +1,76 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Prediction Result - Disease Prediction System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Disease Prediction Result</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Predicted Disease: {{ prediction.predicted_disease.name }}</h5>
+                        <p class="mb-0">Confidence Score: {{ prediction.confidence_score|floatformat:2 }}%</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Symptoms Reported:</h5>
+                        <ul class="list-group">
+                            {% for symptom in symptoms_list %}
+                            <li class="list-group-item">{{ symptom }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>About {{ prediction.predicted_disease.name }}:</h5>
+                        <p>{{ prediction.predicted_disease.description }}</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5>Common Causes:</h5>
+                            <p>{{ prediction.predicted_disease.causes }}</p>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5>Home Remedies:</h5>
+                            <p>{{ prediction.predicted_disease.home_remedies|default:"No specific home remedies available." }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Recommended Medications:</h5>
+                        <p>{{ prediction.predicted_disease.medications|default:"Please consult a doctor for appropriate medications." }}</p>
+                    </div>
+                    
+                    {% if prediction.is_verified %}
+                    <div class="alert alert-success">
+                        <h5 class="alert-heading">Verified by Doctor</h5>
+                        <p>This prediction has been verified by Dr. {{ prediction.verified_by.user_profile.user.first_name }} {{ prediction.verified_by.user_profile.user.last_name }}</p>
+                        {% if prediction.doctor_notes %}
+                        <hr>
+                        <p class="mb-0">Doctor's Notes: {{ prediction.doctor_notes }}</p>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Awaiting Verification</h5>
+                        <p class="mb-0">This prediction has not yet been verified by a doctor. The information provided is based on our AI model's analysis.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'prediction_home' %}" class="btn btn-primary">Make Another Prediction</a>
+                        {% if user.is_authenticated and user.profile.user_type == 'patient' %}
+                        <a href="{% url 'submit_problem' %}" class="btn btn-outline-primary">Submit a Problem</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

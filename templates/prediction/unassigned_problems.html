@@ -1,0 +1,50 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Unassigned Health Problems{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Unassigned Health Problems</h2>
+    
+    {% if problems %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Patient</th>
+                    <th>Title</th>
+                    <th>Symptoms</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for problem in problems %}
+                <tr>
+                    <td>{{ problem.created_at|date:"M d, Y" }}</td>
+                    <td>{{ problem.patient.user_profile.user.username }}</td>
+                    <td>{{ problem.title }}</td>
+                    <td>{% if problem.symptoms %}{{ problem.symptoms|truncatechars:30 }}{% else %}Not specified{% endif %}</td>
+                    <td>
+                        <a href="{% url 'problem_detail' problem.id %}" class="btn btn-sm btn-info">View Details</a>
+                        <form method="post" action="{% url 'assign_problem' problem.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-primary">Take This Case</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <p>There are no unassigned health problems at this time.</p>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{% url 'doctor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
