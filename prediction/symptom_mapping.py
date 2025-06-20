@@ -21,6 +21,35 @@ symptom_mapping = {
     "weight loss": "weight_loss",
     "fever": "mild_fever",
     "high temperature": "mild_fever",
+    "high fever": "high_fever",
+    "cough": "cough",
+    "headache": "headache",
+    "nausea": "nausea",
+    "vomiting": "vomiting",
+    "diarrhea": "diarrhoea",
+    "stomach pain": "stomach_pain",
+    "abdominal pain": "abdominal_pain",
+    "chest pain": "chest_pain",
+    "difficulty breathing": "breathlessness",
+    "shortness of breath": "breathlessness",
+    "dizziness": "dizziness",
+    "skin rash": "skin_rash",
+    "itching": "itching",
+    "sore throat": "patches_in_throat",
+    "runny nose": "runny_nose",
+    "congestion": "congestion",
+    "back pain": "back_pain",
+    "constipation": "constipation",
+    "anxiety": "anxiety",
+    "depression": "depression",
+    "blurred vision": "blurred_and_distorted_vision",
+    "sweating": "sweating",
+    "chills": "chills",
+    "shivering": "shivering",
+    "loss of appetite": "loss_of_appetite",
+    "yellowing of eyes": "yellowing_of_eyes",
+    "yellowing of skin": "yellowish_skin",
+    "dark urine": "dark_urine",
     
     # Arthritis-specific mappings
     "morning stiffness": "movement_stiffness",
@@ -38,4 +67,11 @@ def map_user_symptom(user_input):
     user_input = user_input.lower().strip()
     if user_input in symptom_mapping:
         return symptom_mapping[user_input]
-    return user_input
+    
+    # Try to find partial matches if exact match not found
+    for key, value in symptom_mapping.items():
+        if key in user_input or user_input in key:
+            return value
+    
+    # If no match found, convert spaces to underscores to match training data format
+    return user_input.replace(' ', '_')

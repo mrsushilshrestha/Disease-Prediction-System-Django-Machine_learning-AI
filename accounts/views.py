@@ -128,7 +128,11 @@ def register_patient(request):
         # Create patient
         patient = Patient.objects.create(
             user_profile=user_profile,
-            blood_group=blood_group
+            blood_group=blood_group,
+            height=request.POST.get('height'),
+            weight=request.POST.get('weight'),
+            blood_pressure=request.POST.get('blood_pressure'),
+            sugar_level=request.POST.get('sugar_level')
             # Remove the gender field
         )
         
@@ -330,6 +334,12 @@ def edit_profile(request):
             patient = Patient.objects.get(user_profile=user_profile)
             patient.gender = request.POST.get('gender')
             patient.blood_group = request.POST.get('blood_group')
+            patient.height = request.POST.get('height')
+            patient.weight = request.POST.get('weight')
+            patient.blood_pressure = request.POST.get('blood_pressure')
+            patient.sugar_level = request.POST.get('sugar_level')
+            patient.allergies = request.POST.get('allergies')
+            patient.medical_history = request.POST.get('medical_history')
             patient.save()
         elif user_profile.user_type == 'doctor':
             doctor = Doctor.objects.get(user_profile=user_profile)

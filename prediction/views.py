@@ -13,99 +13,108 @@ def prediction_home(request):
     symptoms = Symptom.objects.all().order_by('name')
     return render(request, 'prediction/prediction_home.html', {'symptoms': symptoms})
 
-# Update the predict_disease function in views.py
-
-from .ml_model import DiseasePredictor
-
-# Initialize the predictor
-predictor = DiseasePredictor()
-
 def predict_disease(request):
     """Disease prediction view"""
     if request.method == 'POST':
         # Get selected symptoms from form
         selected_symptoms = request.POST.getlist('symptoms')
         
-        # Map user symptoms to training data symptoms
-        mapped_symptoms = [map_user_symptom(symptom) for symptom in selected_symptoms]
+        if not selected_symptoms:
+            messages.error(request, 'Please select at least one symptom')
+            return redirect('prediction_home')
         
-        # Predict disease using the model
+        # Convert symptoms to string for storage
+        symptoms_str = ','.join(selected_symptoms)
+        
+        # Predict disease using our ML model
+        from .ml_model import DiseasePredictor
         predictor = DiseasePredictor()
-        disease_name, confidence = predictor.predict(mapped_symptoms)
         
-        # Get or create disease object
-        disease, created = Disease.objects.get_or_create(name=disease_name)
+        # Check if the predict method returns relevant symptoms
+        try:
+            result = predictor.predict(selected_symptoms)
+            if len(result) == 3:
+                top_diseases, top_confidences, relevant_symptoms = result
+            else:
+                top_diseases, top_confidences = result
+                relevant_symptoms = selected_symptoms  # Use selected symptoms as fallback
+        except ValueError as e:
+            messages.error(request, f'Prediction error: {str(e)}')
+            return redirect('prediction_home')
         
-        # Create prediction record
-        prediction = Prediction.objects.create(
-            patient=request.user.patient if hasattr(request.user, 'patient') else None,
-            symptoms=', '.join(selected_symptoms),
-            predicted_disease=disease,
-            confidence_score=confidence
+        # Get or create the primary disease
+        primary_disease, created = Disease.objects.get_or_create(
+            name=top_diseases[0],
+            defaults={
+                'description': f'Information about {top_diseases[0]}',
+                'symptoms': symptoms_str,
+                'causes': f'Common causes of {top_diseases[0]}',
+                'home_remedies': f'Home remedies for {top_diseases[0]}',
+                'medications': f'Common medications for {top_diseases[0]}'
+            }
         )
         
-        return render(request, 'prediction/prediction_result.html', {
-            'prediction': prediction,
-            'disease': disease
-        })
+        # Create prediction record - use only the first confidence score
+        prediction = Prediction(
+            symptoms=symptoms_str,
+            predicted_disease=primary_disease,
+            confidence_score=float(top_confidences[0] * 100),  # Convert to percentage and ensure it's a float
+            is_verified=False
+        )
+        
+        # Associate with patient if user is logged in
+        if request.user.is_authenticated:
+            try:
+                user_profile = UserProfile.objects.get(user=request.user)
+                if user_profile.user_type == 'patient':
+                    patient = Patient.objects.get(user_profile=user_profile)
+                    prediction.patient = patient
+            except (UserProfile.DoesNotExist, Patient.DoesNotExist):
+                pass
+        
+        prediction.save()
+        
+        # Store alternative predictions in session
+        request.session['alternative_diseases'] = top_diseases[1:]
+        request.session['alternative_confidences'] = [float(conf * 100) for conf in top_confidences[1:]]
+        
+        # Store relevant symptoms in session
+        request.session['relevant_symptoms'] = relevant_symptoms
+        
+        return redirect('prediction_result', prediction_id=prediction.id)
     else:
         # Get all symptoms for the form
         symptoms = Symptom.objects.all().order_by('name')
-        return render(request, 'prediction/predict.html', {'symptoms': symptoms})
-    if not selected_symptoms:
-        messages.error(request, 'Please select at least one symptom')
-        return redirect('prediction_home')
-    
-    # Convert symptoms to string for storage
-    symptoms_str = ','.join(selected_symptoms)
-    
-    # Perform prediction using our ML model
-    disease_name, confidence_score = predictor.predict(selected_symptoms)
-    
-    # Get or create the disease
-    disease, created = Disease.objects.get_or_create(
-        name=disease_name,
-        defaults={
-            'description': f'Information about {disease_name}',
-            'symptoms': symptoms_str,
-            'causes': f'Common causes of {disease_name}',
-            'home_remedies': f'Home remedies for {disease_name}',
-            'medications': f'Common medications for {disease_name}'
-        }
-    )
-    
-    # Create prediction record
-    prediction = Prediction(
-        symptoms=symptoms_str,
-        predicted_disease=disease,
-        confidence_score=confidence_score,
-        is_verified=False
-    )
-    
-    # Associate with patient if user is logged in
-    if request.user.is_authenticated:
-        try:
-            user_profile = UserProfile.objects.get(user=request.user)
-            if user_profile.user_type == 'patient':
-                patient = Patient.objects.get(user_profile=user_profile)
-                prediction.patient = patient
-        except (UserProfile.DoesNotExist, Patient.DoesNotExist):
-            pass
-    
-    prediction.save()
-    
-    return redirect('prediction_result', prediction_id=prediction.id)
+        return render(request, 'prediction/prediction_home.html', {'symptoms': symptoms})
 
 def prediction_result(request, prediction_id):
     """Display prediction result"""
     prediction = get_object_or_404(Prediction, id=prediction_id)
     
     # Parse symptoms string back to list
-    symptoms_list = prediction.symptoms.split(',')
+    symptoms_list = prediction.symptoms.split(',') if prediction.symptoms else []
+    
+    # Get alternative predictions from session
+    alternative_diseases = request.session.get('alternative_diseases', [])
+    alternative_confidences = request.session.get('alternative_confidences', [])
+    
+    # Get relevant symptoms from session
+    relevant_symptoms = request.session.get('relevant_symptoms', symptoms_list)
+    
+    # Create a list of alternative predictions
+    alternative_predictions = []
+    for i in range(len(alternative_diseases)):
+        if i < len(alternative_confidences):
+            alternative_predictions.append({
+                'disease': alternative_diseases[i],
+                'confidence': alternative_confidences[i]
+            })
     
     context = {
         'prediction': prediction,
         'symptoms_list': symptoms_list,
+        'relevant_symptoms': relevant_symptoms,
+        'alternative_predictions': alternative_predictions
     }
     
     return render(request, 'prediction/prediction_result.html', context)

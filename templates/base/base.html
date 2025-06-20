@@ -50,11 +50,7 @@
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <!-- Replace this line in the navbar -->
                                 <i class="fas {% if user.profile.user_type == 'patient' %}fa-user{% elif user.profile.user_type == 'doctor' %}fa-user-md{% elif user.profile.user_type == 'admin' %}fa-user-shield{% endif %} me-1"></i>
-                                
-                                <!-- With this corrected version -->
-                                <i class="fas {% if user_profile.user_type == 'patient' %}fa-user{% elif user_profile.user_type == 'doctor' %}fa-user-md{% elif user_profile.user_type == 'admin' %}fa-user-shield{% endif %} me-1"></i>
                                 {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
