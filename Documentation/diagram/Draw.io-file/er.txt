@@ -1,0 +1,53 @@
+Disease Prediction System using Django
+
+it have a actors:
+admin
+user(patient)
+doctors
+
+it have a features:
+
+1.user:
+ for register:
+(username,first_name,last_name,email,password,)
+health information:
+(age,weight,contact_number,height,blood_group,blood_pressure,sugar_level)
+for login:
+(username,password)
+
+2.doctor:
+  for registration:
+  (first_name,last_name,emai,username,password,)
+  professional information:
+  (Specialization,qualifications,Years of Experience,License Number,Consultation Fee)
+  
+   for login:
+  (username,password)
+
+3.admin
+   for registration:
+   (first_name,last_name,email,username,password)
+    
+   for login:
+   (username,password)
+  
+
+prime features:
+1.user
+user can predict the disease(this is base on the data mining and AI)
+user can submit the problem
+user can see the respond and predict history
+
+2.doctor:
+doctor can verify the disease
+doctor can see the user submitted problem
+doctor can give the preception/solution to the problem
+
+
+3. admin:
+   admin see the patient report:
+   admin can add and remove doctor
+   admin can active and deactive patient
+   admin can add/make new admin
+
+
